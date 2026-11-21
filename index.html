@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111526">
-<meta name="description" content="Pocket Log — уютный личный каталог игр для PSP и других консолей с синхронизацией через GitHub.">
-<title>Pocket Log ♡ My tiny game archive</title>
+<meta name="description" content="Pocket Log 4.0 — милый DOS-каталог игр с приватной синхронизацией GitHub.">
+<title>Pocket Log 4.0 ♡ DOS directory</title>
 <style>
 :root{color-scheme:dark;--bg:#101525;--panel:#1a2034;--panel2:#212942;--ink:#f4f4ff;--muted:#afbbd6;--pink:#ff9fc9;--pink2:#f3c7e4;--cyan:#88e5e4;--mint:#b8efd7;--border:#3b4562;--red:#ffb3b3;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif}
 *{box-sizing:border-box}html{min-height:100%;scroll-behavior:smooth}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);overflow-x:hidden}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}a{color:var(--cyan)}[hidden]{display:none!important}
@@ -81,6 +81,86 @@ dialog::backdrop{backdrop-filter:none}.modalbar{background:#26374f;padding:14px 
 @media(max-width:1020px){.catalogs{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:720px){.shell{padding:0 10px 14px}.top{height:62px}.brandname{font-size:17px}.micro{font-size:8px}.frame{margin-top:9px;min-height:calc(100dvh - 130px)}.content{padding:18px 13px 24px}.catalogs{grid-template-columns:repeat(2,minmax(0,1fr))}.deco{font-size:10px}.entry{flex-wrap:wrap;gap:6px}.entrytext{flex:auto;width:calc(100% - 42px)}.entryactions{margin-left:35px;width:calc(100% - 35px)}.entryactions .mark{flex:1}.entryactions .edit{flex:none}.token-notice{margin-top:9px;flex-wrap:wrap;font-size:11px;padding:10px 12px}.token-notice .btn{margin-left:auto}.topright{gap:5px}.sys{display:none}}
 @media(max-width:430px){.brand{gap:7px}.brandname{font-size:16px}.micro{font-size:7px}.symbol{width:31px;height:31px;font-size:18px}.folder{padding:13px;min-height:123px}.foldername{font-size:17px}.titleline h1{font-size:25px}.topright .btn.icon{width:30px}.framebar{padding:7px 10px}}
+
+/* v4 — directory-first DOS interface: actual folders and flat file list */
+:root{--folder:#a5e3df;--folderShade:#5b98b8;--folderTab:#d1b9ed;--dosline:#54658144}
+body{background:#0b1423}
+/* very soft phosphor scanlines, not a screen-obscuring filter */
+body::after{content:"";position:fixed;z-index:9;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,#02122166 4px);opacity:.075}
+.net{background:radial-gradient(ellipse 780px 590px at 95% 4%,#ee81c319,transparent 75%),radial-gradient(ellipse 830px 590px at 0 95%,#60d2de14,transparent 75%),linear-gradient(90deg,#8195cf08 1px,transparent 1px),linear-gradient(#8195cf08 1px,transparent 1px);background-size:auto,auto,30px 30px,30px 30px}
+.framebar{background:#1e2e48;border-bottom-color:#435b7f}
+.framebar::before{content:"[ DISK C: ]";color:var(--pink);font-size:10px}
+.path{color:#b0dacc}
+.content{padding-top:clamp(17px,2.1vw,30px)}
+.dos-prompt{font:12px/1.9 var(--mono);display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--mint);margin:0 0 12px;min-height:26px;word-break:break-word}
+.dos-prompt .root{color:var(--pink);font-weight:700}.dos-prompt .command{color:#f2f2fc;white-space:nowrap}
+.dos-prompt .typed{display:inline-block;overflow:hidden;width:0;white-space:nowrap;animation:dos-type .55s steps(var(--steps,8),end) forwards}
+.dos-cursor{color:var(--pink);animation:cursorblink 1.15s steps(1,end) infinite}
+@keyframes dos-type{to{width:var(--cmd-width,8ch)}}@keyframes cursorblink{50%{opacity:.06}}
+.diskline{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#a8bdd4;font:10px/1.7 var(--mono);border-bottom:1px dashed #5369885c;padding:3px 0 11px;margin-bottom:10px;letter-spacing:.3px}
+.diskline strong{color:var(--cyan)}
+.dos-directory{margin:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:clamp(12px,2vw,26px);padding:21px 0 22px;align-items:start;animation:soft-reveal .18s ease-out}
+.directory-item{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:flex-start;position:relative;min-width:0;border:0;background:transparent;color:var(--ink);min-height:138px;text-align:center;padding:8px 4px 10px;border-radius:2px;font:inherit;transition:background .18s}
+.directory-item:hover,.directory-item:focus-visible{background:#27364a91;outline-offset:1px}
+.directory-item:hover .file-folder,.directory-item:focus-visible .file-folder{transform:translateY(-4px);filter:drop-shadow(0 5px 8px #5ee2de33)}
+.file-folder{display:block;position:relative;width:88px;height:67px;flex:none;margin:1px auto 5px;filter:drop-shadow(3px 4px 0 #060c19b5);transition:transform .16s,filter .16s}
+.file-folder::before{content:"";position:absolute;top:2px;left:5px;width:45px;height:19px;background:var(--folderTab);clip-path:polygon(0 0,74% 0,93% 34%,100% 100%,0 100%);box-shadow:inset 0 2px 0 #ffffff4a}
+.file-folder::after{content:"";position:absolute;left:3px;right:3px;top:15px;height:48px;border:1px solid #e1fbf755;background:linear-gradient(145deg,#acdce8 0%,#7ebad4 56%,#6397bf 100%);clip-path:polygon(0 0,100% 0,100% 91%,96% 100%,0 100%);box-shadow:inset 0 3px 0 #e2fff680}
+.folder-heart{position:absolute;z-index:1;top:32px;left:0;right:0;font:18px var(--mono);color:#354c72}
+.directory-item.new .file-folder::before{background:#a08dbb}
+.directory-item.new .file-folder::after{background:#28374f;border:1px dashed #aab7d4;box-shadow:inset 0 2px 0 #b0beda18}
+.directory-item.new .folder-heart{color:var(--pink);font-size:23px;top:29px}
+.dir-label{max-width:100%;overflow-wrap:anywhere;font:700 13px/1.45 var(--mono);color:#f5ebfe}
+.dir-meta{font:10px/1.35 var(--mono);color:#a9b9d4;max-width:100%}
+.dir-meta b{font-weight:600;color:var(--cyan)}
+.dos-footerline{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;border-top:1px dashed #5063816e;padding-top:12px;color:#a0b6d2;font:10px/1.6 var(--mono)}
+.dos-footerline span:last-child{color:#d6bde5}
+@keyframes soft-reveal{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+/* file manager header and unboxed rows */
+.cat-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0}
+.crumb{color:var(--cyan);margin:0;font-size:11px}
+.cataloghead{border-bottom:1px solid #5164858a;padding:6px 0 12px;align-items:center}
+.cataloghead .titleline{margin:0}.cataloghead .titleline h1{font-size:clamp(20px,2.3vw,30px);letter-spacing:-1px}
+.cataloghead .titleline h1 span{font-size:.64em;letter-spacing:0;color:var(--muted);vertical-align:middle}
+.cataloghead .titleline h1::before{content:"▸ ";color:var(--cyan)}
+.cataloghead .titleline h1::after{content:"\\";color:var(--pink)}
+.cataloghead .btn{flex:none}
+.catalog-description{font:11px/1.7 var(--mono);margin:8px 0 0;color:#c3d1e8}
+.stats{margin:10px 0 0}.stat{background:none;border:none;border-left:2px solid #6786a2;padding:3px 12px 3px 9px}
+.stat:first-child{border-left-color:var(--pink)}.stat b{color:var(--cyan)}
+.toolbar{margin:17px 0 11px}
+.search{max-width:660px}
+.filters{margin:4px 0 15px}
+.dos-filehead{display:grid;grid-template-columns:43px minmax(0,1fr) minmax(135px,auto) minmax(150px,auto) 35px;gap:12px;align-items:center;border-top:1px solid #66809a;border-bottom:1px solid #66809a;padding:9px 11px;background:#26364b88;font:10px/1.4 var(--mono);color:#d6b8e0;letter-spacing:.75px}
+.dos-filehead span:nth-child(n+3){text-align:center}
+.list{gap:0;animation:soft-reveal .15s ease-out}
+.entry{border:0;border-bottom:1px solid var(--dosline);border-radius:0;min-height:47px;padding:8px 11px;background:transparent;gap:10px;transition:background .12s;position:relative}
+.entry:nth-child(even){background:#1c2a412e}.entry:hover{border-color:var(--dosline);background:#344b615c}
+.entry::before{content:"";width:3px;position:absolute;inset:4px auto 4px 0;background:transparent}
+.entry:hover::before{background:var(--cyan)}
+.number{width:24px;flex:none;color:#91a9c7;font:10px var(--mono)}
+.fileglyph{display:inline-grid;place-items:center;font:14px var(--mono);color:#8fe1de;margin-right:3px;flex:none}
+.entrytitle{font:600 12px/1.6 var(--mono);color:#edf1fc}
+.fileextension{font:9px var(--mono);color:#7f9db7;margin-left:8px;letter-spacing:.5px}
+.entrynote{color:#adbdd4;font-size:10px;margin-top:1px;line-height:1.6}
+.entryactions{gap:12px}
+.mark{border:1px solid transparent;background:transparent;min-height:30px;padding:4px 9px;min-width:115px;text-align:center;color:#a6b5cf;font:11px var(--mono);border-radius:1px}
+.mark:hover{border-color:#8dbbd088;background:#2c4052}
+.mark.on{color:#a6f3dc;border-color:#5f9f93b5;background:#153c3b91}
+.mark.finish.on{color:#eed4ff;border-color:#ab8bc9c9;background:#42375391}
+.edit{min-height:29px;background:transparent;border-color:transparent;color:#bfabd7}
+.edit:hover{color:#f3d4ef;background:#34425e;border-color:#64769a}
+.file-end{font:10px/1.7 var(--mono);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:13px 4px;color:#9db4d0}
+.file-end span:last-child{color:var(--cyan)}
+.empty{border:0;border-bottom:1px dashed #5063816e;padding:30px 15px}
+.terminalfoot{align-items:center;margin-top:13px;padding:6px 3px 0}
+.easteregg{font:10px var(--mono);color:#ad9ab9!important;opacity:.7;transition:opacity .18s,color .18s}
+.easteregg:hover{opacity:1;color:var(--pink)!important}
+@media(min-width:1280px){.dos-directory{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+@media(max-width:720px){.dos-directory{grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:12px;padding-top:15px}.directory-item{min-height:126px}.file-folder{transform:scale(.88);margin:0 auto}.directory-item:hover .file-folder{transform:scale(.88) translateY(-3px)}.dir-label{font-size:12px}.dos-filehead{display:none}.entry{flex-wrap:wrap;gap:7px 8px;padding:9px 5px}.number{width:20px}.fileglyph{font-size:12px;margin-right:2px}.entrytext{width:calc(100% - 50px);flex:1}.entryactions{margin:0 0 0 29px;width:calc(100% - 29px);gap:5px}.entryactions .mark{flex:1;min-width:0;font-size:10px;padding:4px 3px}.entryactions .edit{flex:none}.cataloghead{align-items:start}.cataloghead .btn{font-size:10px}.stats{margin-top:6px}.stat{font-size:10px;padding:3px 6px}.fileextension{font-size:8px}.dos-prompt{font-size:10px;gap:6px}}
+@media(max-width:370px){.dos-directory{grid-template-columns:repeat(2,minmax(0,1fr))}.entryactions{gap:3px}.mark{font-size:9px}.cataloghead .titleline h1{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.dos-prompt .typed{width:var(--cmd-width,8ch);animation:none}.dos-cursor{animation:none}.dos-directory,.list{animation:none}.easteregg,.file-folder,.directory-item{transition:none}}
+
 </style>
 </head>
 <body>
@@ -96,7 +176,7 @@ PORTABLE://READY</div><div class="cyber c3">signal: ░▒▓██▓▒░
 <header class="top"><div class="brand"><div class="symbol" aria-hidden="true">✳</div><div><div class="brandname">pocket<span>.log</span></div><div class="micro">MY LITTLE DIGITAL ARCHIVE ♡</div></div></div><div class="topright"><button id="syncBtn" class="btn ghost" title="Обновить из облака"><span id="syncIndicator" class="syncdot"></span><span id="syncText" class="labelhide">локально</span></button><button id="settingsBtn" class="btn icon ghost" title="Настроить облако" aria-label="Настроить синхронизацию">⚙</button><button id="exportBtn" class="btn icon ghost" title="Скачать резервную копию" aria-label="Экспорт базы в JSON">⇩</button></div></header>
 <div id="tokenNotice" class="token-notice" role="status" aria-live="polite" hidden data-level="info"><div class="token-copy"><span class="token-symbol">[!]</span><span id="tokenNoticeText"></span></div><button id="tokenFixBtn" class="btn small" type="button">[ ОБНОВИТЬ КЛЮЧ ]</button></div>
 <div class="frame"><div class="framebar"><span class="circle"></span><span class="circle"></span><span class="circle"></span><span class="path" id="framePath">~/pocket.log / consoles</span><span class="sys">SYS // 200X</span></div><main class="content" id="main"></main></div>
-<footer class="terminalfoot"><span>pocket.log / tiny personal database · v3.0</span><span>stay cute, stay offline (｡•̀ᴗ-)✧</span></footer>
+<footer class="terminalfoot"><span>pocket.log / tiny personal database · v4.0</span><span class="easteregg" title="(づ｡◕‿‿◕｡)づ">сделано ChatGPT с любовью для тебя ♡</span></footer>
 </div>
 <dialog id="entryDialog" aria-labelledby="entryHeading"><div class="modalbar"><h2 id="entryHeading">Добавить игру ♡</h2><button class="btn icon small" data-close="entryDialog" aria-label="Закрыть">×</button></div><form id="entryForm" class="modalbody"><input id="entryId" type="hidden"><label class="field"><span>Название игры *</span><input id="entryTitle" maxlength="160" placeholder="Persona 3 Portable" required autocomplete="off"></label><label class="field"><span>Заметка (необязательно)</span><textarea id="entryNote" maxlength="2000" placeholder="Русификатор, впечатления, где остановилась..."></textarea></label><div class="modalbuttons"><button type="button" id="deleteEntry" class="btn danger" hidden>Удалить</button><div class="rightbuttons"><button type="button" class="btn" data-close="entryDialog">Отмена</button><button type="submit" class="btn primary">Сохранить ♡</button></div></div></form></dialog>
 <dialog id="catalogDialog" aria-labelledby="catalogHeading"><div class="modalbar"><h2 id="catalogHeading">Новый каталог ✿</h2><button class="btn icon small" data-close="catalogDialog" aria-label="Закрыть">×</button></div><form id="catalogForm" class="modalbody"><input id="catalogId" type="hidden"><label class="field"><span>Название консоли *</span><input id="catalogName" maxlength="50" placeholder="PS2, Nintendo DS, PC..." required></label><label class="field"><span>Заметка к каталогу</span><textarea id="catalogNote" maxlength="1200" placeholder="Например, игры для PSP Go и любимые русификаторы"></textarea></label><div class="modalbuttons"><button type="button" class="btn danger" id="deleteCatalog" hidden>Удалить каталог</button><div class="rightbuttons"><button type="button" class="btn" data-close="catalogDialog">Отмена</button><button type="submit" class="btn primary">Сохранить ✿</button></div></div></form></dialog>
@@ -162,12 +242,24 @@ function liveGames(catId){return db.games.filter(x=>x.catalogId===catId&&!x.dele
 function findCat(){return db.catalogs.find(x=>x.id===active&&!x.deleted)}
 function touch(){db=compact(db);saveLocal();render();scheduleSync()}
 function setSync(s){syncState=s;const label={local:'локально',busy:'синхронизация',good:'сохранено ☁',bad:'ошибка sync'}[s];$('syncText').textContent=label;$('syncIndicator').className='syncdot'+(s==='good'?' good':s==='busy'?' busy':s==='bad'?' bad':'');$('syncBtn').title=s==='local'?'Подключить облачную базу':s==='good'?'Проверить изменения из GitHub':'Обновить синхронизацию'}
-function render(){const main=$('main');let cat=findCat();if(active&&!cat)active=null;
- if(!active){$('framePath').textContent='~/pocket.log / consoles';const all=liveCats();main.innerHTML=`<div class="introline"><i></i> USER://MY_ARCHIVE / CONNECTED TO MEMORY</div><div class="titleline"><h1>Мои <span>консоли_</span></h1><span class="deco">✿ (｡•ᴗ•｡) ♡</span></div><p class="subtitle">Выбери консоль, а внутри будет только её список игр. Никаких обложек, жанров и лишнего шума. Просто маленький уютный архив.</p><div class="countline">/DIRECTORIES <b>${all.length} каталогов</b></div><div class="catalogs">${all.map(x=>{const g=liveGames(x.id);return `<button class="folder" data-open="${esc(x.id)}"><span class="foldericon">▣</span><span class="foldergo">↗</span><span><span class="foldername">${esc(x.name)}</span><br><span class="foldercount">${g.length} игр · ${g.filter(a=>a.completed).length} пройдено</span></span></button>`}).join('')}<button class="folder new" data-action="add-catalog"><span class="foldericon">＋ ✿</span><span class="foldername">Новая консоль</span></button></div>`;return;}
- $('framePath').textContent=`~/pocket.log / ${cat.name.toLowerCase()}`;
- const games=liveGames(cat.id);const sorted=games.filter(x=>(filter==='all'||(filter==='need'&&!x.downloaded)||(filter==='downloaded'&&x.downloaded)||(filter==='unfinished'&&!x.completed)||(filter==='completed'&&x.completed))&&(!search||normal(x.title+' '+x.note).includes(normal(search)))).sort((a,b)=>a.title.localeCompare(b.title,'ru',{numeric:true}));
+const gameAlphabet = new Intl.Collator('ru', {numeric:true, sensitivity:'base'});
+let lastRenderedDirectory = null;
+function commandLine(path,command,animate){const chars=command.length;return `<div class="dos-prompt" aria-label="Команда: ${esc(path)} ${esc(command)}"><span class="root">${esc(path)}</span><span class="command ${animate?'typed':''}" style="--steps:${chars};--cmd-width:${chars}ch">${esc(command)}</span><span class="dos-cursor" aria-hidden="true">▌</span></div>`}
+function render(){
+ const main=$('main');let cat=findCat();if(active&&!cat)active=null;
+ const directory=active||'root';const animate=directory!==lastRenderedDirectory;lastRenderedDirectory=directory;
+ if(!active){
+  $('framePath').textContent='C:\\POCKET\\GAMES\\';
+  const all=liveCats();
+  const count=all.reduce((s,c)=>s+liveGames(c.id).length,0);
+  main.innerHTML=`${commandLine('C:\\POCKET\\GAMES>','DIR /AD',animate)}<div class="diskline"><span>VOLUME: <strong>POCKET.LOG ♡</strong> / ROOT DIRECTORY</span><span>DIRECTORIES: <strong>${all.length}</strong> / FILES: <strong>${count}</strong></span></div><section class="dos-directory" aria-label="Каталоги консолей">${all.map(c=>{const games=liveGames(c.id);return `<button type="button" class="directory-item" data-open="${esc(c.id)}" aria-label="Открыть каталог ${esc(c.name)}"><span class="file-folder" aria-hidden="true"><span class="folder-heart">✿</span></span><span class="dir-label">${esc(c.name)}\\</span><span class="dir-meta">&lt;DIR&gt; · <b>${games.length}</b> файлов</span></button>`}).join('')}<button type="button" class="directory-item new" data-action="add-catalog"><span class="file-folder" aria-hidden="true"><span class="folder-heart">＋</span></span><span class="dir-label">[НОВАЯ ПАПКА]</span><span class="dir-meta">создать каталог ♡</span></button></section><div class="dos-footerline"><span>${all.length} каталогов · ${count} файлов</span><span>⌁ SELECT DIRECTORY / (｡•ᴗ•｡) ♡</span></div>`;
+  return;
+ }
+ $('framePath').textContent=`C:\\POCKET\\GAMES\\${cat.name.toUpperCase()}\\`;
+ const games=liveGames(cat.id);
+ const sorted=games.filter(g=>(filter==='all'||(filter==='need'&&!g.downloaded)||(filter==='downloaded'&&g.downloaded)||(filter==='unfinished'&&!g.completed)||(filter==='completed'&&g.completed))&&(!search||normal(g.title+' '+g.note).includes(normal(search)))).sort((a,b)=>gameAlphabet.compare(a.title,b.title));
  const choices=[['all','Все'],['need','Не скачаны'],['downloaded','Скачаны'],['unfinished','Не пройдены'],['completed','Пройдены']];
- main.innerHTML=`<button class="crumb" data-action="home">← /консоли</button><div class="introline"><i></i> SYSTEM://${esc(cat.name.toUpperCase())} / GAMES</div><div class="cataloghead"><div class="titleline"><h1>${esc(cat.name)}<span>_archive</span></h1></div><button class="btn ghost small" data-action="edit-catalog" title="Изменить название и заметку каталога">⚙ каталог</button></div>${cat.note?`<p class="subtitle">${esc(cat.note)}</p>`:'<p class="subtitle">Маленький список игр, которые хочется сохранить ♡</p>'}<div class="stats"><span class="stat"><b>${games.length}</b> всего</span><span class="stat"><b>${games.filter(x=>x.downloaded).length}</b> скачано</span><span class="stat"><b>${games.filter(x=>x.completed).length}</b> пройдено</span></div><div class="toolbar"><input class="search" id="searchGame" type="search" placeholder="⌕ Найти игру..." aria-label="Поиск игры" value="${esc(search)}"><button class="btn primary" data-action="add-game">＋ Игра</button><button class="btn ghost" data-action="import">⇧ Список</button></div><div class="filters">${choices.map(([k,v])=>`<button class="chip ${filter===k?'active':''}" data-filter="${k}" aria-pressed="${filter===k}">${v}</button>`).join('')}</div><div class="countline">/FILE_LIST <b>${sorted.length} записей</b></div><section class="list" aria-label="Список игр">${sorted.length?sorted.map((g,i)=>`<article class="entry" data-id="${esc(g.id)}"><span class="number">${String(i+1).padStart(2,'0')}</span><div class="entrytext"><div class="entrytitle">${esc(g.title)}</div>${g.note?`<div class="entrynote">✎ ${esc(g.note)}</div>`:''}</div><div class="entryactions"><button class="mark ${g.downloaded?'on':''}" data-action="download" aria-label="${g.downloaded?'Отметить как не скачанную':'Отметить как скачанную'}: ${esc(g.title)}" aria-pressed="${g.downloaded}">${g.downloaded?'✓ скачано':'↓ не скачано'}</button><button class="mark finish ${g.completed?'on':''}" data-action="finish" aria-label="${g.completed?'Отметить как не пройденную':'Отметить как пройденную'}: ${esc(g.title)}" aria-pressed="${g.completed}">${g.completed?'♡ пройдено':'☆ не пройдено'}</button><button class="edit" data-action="edit-game" aria-label="Изменить ${esc(g.title)}" title="Изменить название или заметку">✎</button></div></article>`).join(''):`<div class="empty"><span class="cute">(っ˘ω˘ς ) ♡</span>${games.length?'По этому фильтру ничего не нашлось':'Пока нет игр. Добавь первую или загрузи список!'}</div>`}</section>`;
+ main.innerHTML=`<div class="cat-tools"><button class="crumb" data-action="home">← CD .. / НА УРОВЕНЬ ВЫШЕ</button><span class="deco">✿ ♡ (｡•ᴗ•｡)</span></div>${commandLine(`C:\\POCKET\\GAMES\\${cat.name.toUpperCase()}>`,'DIR /O:N',animate)}<div class="cataloghead"><div class="titleline"><h1>${esc(cat.name)}</h1></div><button class="btn ghost small" data-action="edit-catalog" title="Изменить название и заметку каталога">⚙ КАТАЛОГ</button></div>${cat.note?`<p class="catalog-description">// ${esc(cat.note)}</p>`:''}<div class="stats"><span class="stat"><b>${games.length}</b> файлов</span><span class="stat"><b>${games.filter(g=>g.downloaded).length}</b> скачано</span><span class="stat"><b>${games.filter(g=>g.completed).length}</b> пройдено</span></div><div class="toolbar"><input class="search" id="searchGame" type="search" placeholder="⌕ Поиск файла / игры..." aria-label="Поиск игры" value="${esc(search)}"><button class="btn primary" data-action="add-game">＋ ИГРА</button><button class="btn ghost" data-action="import">⇧ СПИСОК</button></div><div class="filters">${choices.map(([k,v])=>`<button class="chip ${filter===k?'active':''}" data-filter="${k}" aria-pressed="${filter===k}">${v}</button>`).join('')}</div><div class="diskline"><span>DIRECTORY OF C:\\POCKET\\GAMES\\${esc(cat.name.toUpperCase())}</span><span>SORT: <strong>A → Z</strong> / ПО АЛФАВИТУ</span></div><div class="dos-filehead" aria-hidden="true"><span>№</span><span>ИМЯ ФАЙЛА</span><span>СКАЧАНО</span><span>ПРОЙДЕНО</span><span>РЕД.</span></div><section class="list" aria-label="Список игр">${sorted.length?sorted.map((g,i)=>`<article class="entry" data-id="${esc(g.id)}"><span class="number">${String(i+1).padStart(2,'0')}</span><span class="fileglyph" aria-hidden="true">▤</span><div class="entrytext"><div class="entrytitle">${esc(g.title)}<span class="fileextension" aria-hidden="true">.GAME</span></div>${g.note?`<div class="entrynote">└─ ${esc(g.note)}</div>`:''}</div><div class="entryactions"><button class="mark ${g.downloaded?'on':''}" data-action="download" aria-label="${g.downloaded?'Отметить как не скачанную':'Отметить как скачанную'}: ${esc(g.title)}" aria-pressed="${g.downloaded}">${g.downloaded?'✓ скачано':'○ не скачано'}</button><button class="mark finish ${g.completed?'on':''}" data-action="finish" aria-label="${g.completed?'Отметить как не пройденную':'Отметить как пройденную'}: ${esc(g.title)}" aria-pressed="${g.completed}">${g.completed?'♡ пройдено':'◇ не пройдено'}</button><button class="edit" data-action="edit-game" aria-label="Изменить ${esc(g.title)}" title="Изменить название или заметку">✎</button></div></article>`).join(''):`<div class="empty"><span class="cute">(っ˘ω˘ς ) ♡</span>${games.length?'По этому фильтру файлов нет':'Каталог пуст. Добавь игру или загрузи список!'}</div>`}</section><div class="file-end"><span>${sorted.length} файлов показано · ${games.length} всего</span><span>END OF DIRECTORY ♡</span></div>`;
 }
 function resetView(){filter='all';search=''}
 function showEntry(game){$('entryForm').reset();$('entryId').value=game?.id||'';$('entryTitle').value=game?.title||'';$('entryNote').value=game?.note||'';$('entryHeading').textContent=game?'Изменить игру':'Новая игра ♡';$('deleteEntry').hidden=!game;$('entryDialog').showModal();$('entryTitle').focus()}
