@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111526">
-<meta name="description" content="Pocket Log 7.0 — DOS-каталог игр и менеджер обложек с синхронизацией GitHub.">
-<title>Pocket Log 7.0 ♡ DOS cover toolbox</title>
+<meta name="description" content="Pocket Log 8.0 — DOS-каталог игр и менеджер обложек с синхронизацией GitHub.">
+<title>Pocket Log 8.0 ♡ DOS cover toolbox</title>
 <link rel="icon" href="./favicon.ico" sizes="any">
 <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 <link rel="icon" type="image/png" href="./favicon.png" sizes="256x256">
@@ -220,7 +220,7 @@ PORTABLE://READY</div><div class="cyber c3">signal: ░▒▓██▓▒░
 <header class="top"><div class="brand"><div class="symbol" aria-hidden="true"><img src="./favicon.png" alt="" class="brand-icon" width="34" height="34"></div><div><div class="brandname">pocket<span>.log</span></div><div class="micro">MY LITTLE DIGITAL ARCHIVE ♡</div></div></div><div class="topright"><a class="btn ghost cover-tool-link" href="./cover-manager.html" title="Очередь обложек: Libretro → Wikipedia → ручной ввод">♡ COVER.EXE</a><button id="syncBtn" class="btn ghost" title="Обновить из облака"><span id="syncIndicator" class="syncdot"></span><span id="syncText" class="labelhide">локально</span></button><button id="settingsBtn" class="btn icon ghost" title="Настроить облако" aria-label="Настроить синхронизацию">⚙</button><button id="exportBtn" class="btn icon ghost" title="Скачать резервную копию" aria-label="Экспорт базы в JSON">⇩</button></div></header>
 <div id="tokenNotice" class="token-notice" role="status" aria-live="polite" hidden data-level="info"><div class="token-copy"><span class="token-symbol">[!]</span><span id="tokenNoticeText"></span></div><button id="tokenFixBtn" class="btn small" type="button">[ ОБНОВИТЬ КЛЮЧ ]</button></div>
 <div class="frame"><div class="framebar"><span class="circle"></span><span class="circle"></span><span class="circle"></span><span class="path" id="framePath">~/pocket.log / consoles</span><span class="sys">SYS // 200X</span></div><main class="content" id="main"></main></div>
-<footer class="terminalfoot"><span>pocket.log / tiny personal database · v7.0</span><span class="easteregg" title="(づ｡◕‿‿◕｡)づ">сделано ChatGPT с любовью для тебя ♡</span></footer>
+<footer class="terminalfoot"><span>pocket.log / tiny personal database · v8.0</span><span class="easteregg" title="(づ｡◕‿‿◕｡)づ">сделано ChatGPT с любовью для тебя ♡</span></footer>
 </div>
 <dialog id="entryDialog" aria-labelledby="entryHeading"><div class="modalbar"><h2 id="entryHeading">Добавить игру ♡</h2><button class="btn icon small" data-close="entryDialog" aria-label="Закрыть">×</button></div><form id="entryForm" class="modalbody"><input id="entryId" type="hidden"><label class="field"><span>Название игры *</span><input id="entryTitle" maxlength="160" placeholder="Persona 3 Portable" required autocomplete="off"></label><label class="field"><span>Заметка (необязательно)</span><textarea id="entryNote" maxlength="2000" placeholder="Русификатор, впечатления, где остановилась..."></textarea></label><label class="field"><span>Ссылка на обложку (необязательно)</span><input id="entryCover" type="url" maxlength="1200" placeholder="https://example.com/game-cover.jpg" autocomplete="off" inputmode="url"><small class="field-hint">Без ссылки Pocket Log попробует найти миниатюру PSP в каталоге RetroArch. Для других консолей можно указать свою ссылку. Сайт не загружает картинки в GitHub.</small></label><div class="modalbuttons"><button type="button" id="deleteEntry" class="btn danger" hidden>Удалить</button><div class="rightbuttons"><button type="button" class="btn" data-close="entryDialog">Отмена</button><button type="submit" class="btn primary">Сохранить ♡</button></div></div></form></dialog>
 <dialog id="catalogDialog" aria-labelledby="catalogHeading"><div class="modalbar"><h2 id="catalogHeading">Новый каталог ✿</h2><button class="btn icon small" data-close="catalogDialog" aria-label="Закрыть">×</button></div><form id="catalogForm" class="modalbody"><input id="catalogId" type="hidden"><label class="field"><span>Название консоли *</span><input id="catalogName" maxlength="50" placeholder="PS2, Nintendo DS, PC..." required></label><label class="field"><span>Заметка к каталогу</span><textarea id="catalogNote" maxlength="1200" placeholder="Например, игры для PSP Go и любимые русификаторы"></textarea></label><div class="modalbuttons"><button type="button" class="btn danger" id="deleteCatalog" hidden>Удалить каталог</button><div class="rightbuttons"><button type="button" class="btn" data-close="catalogDialog">Отмена</button><button type="submit" class="btn primary">Сохранить ✿</button></div></div></form></dialog>
@@ -289,39 +289,11 @@ function touch(){db=compact(db);saveLocal();render();scheduleSync()}
 function setSync(s){syncState=s;const label={local:'локально',busy:'синхронизация',good:'сохранено ☁',bad:'ошибка sync'}[s];$('syncText').textContent=label;$('syncIndicator').className='syncdot'+(s==='good'?' good':s==='busy'?' busy':s==='bad'?' bad':'');$('syncBtn').title=s==='local'?'Подключить облачную базу':s==='good'?'Проверить изменения из GitHub':'Обновить синхронизацию'}
 const gameAlphabet = new Intl.Collator('ru', {numeric:true, sensitivity:'base'});
 let lastRenderedDirectory = null;
-// Remote box-art from Libretro's thumbnail library (no API key).
-// Image requests are lazy. A missing image always falls back to a decorative file icon.
-const pspAlias={
- 'persona 3 portable':'Shin Megami Tensei - Persona 3 Portable',
- 'the 3rd birthday':'3rd Birthday, The',
- 'ghost in the shell: stand alone complex':'Ghost in the Shell - Stand Alone Complex',
- 'black rock shooter: the game':'Black Rock Shooter - The Game',
- 'god eater burst':'Gods Eater Burst',
- 'metal gear solid: peace walker':'Metal Gear Solid - Peace Walker',
- 'syphon filter: logan\'s shadow':'Syphon Filter - Logan\'s Shadow',
- 'crisis core: final fantasy vii':'Crisis Core - Final Fantasy VII',
- 'dissidia: final fantasy':'Dissidia - Final Fantasy',
- 'valkyria chronicles ii':'Valkyria Chronicles II',
- 'star wars: lethal alliance':'Star Wars - Lethal Alliance',
- 'silent hill: shattered memories':'Silent Hill - Shattered Memories',
- 'fate/extra':'Fate-Extra',
- 'phantasy star portable 2 infinity':'Phantasy Star Portable 2 Infinity',
- 'metal gear acid 2':'Metal Gear Acid 2'
-};
+// Cover discovery is handled by COVER.EXE. The main list loads ONLY saved URLs:
+// no speculative 404 requests on every PSP game, which reduces network and memory usage.
 function coverCandidates(game,catalogName){
- const links=[]; const manual=safeCover(game.cover);if(manual)links.push(manual);
- if(normal(catalogName)!=='psp')return links;
- const title=game.title.trim(); const alias=pspAlias[normal(title)]||title;
- const names=[alias];if(alias!==title)names.push(title);
- for(const name of names){
-   // Libretro filenames normally use a region suffix and substitute reserved symbols.
-   const base=name.replace(/[\/:*?"<>|]/g,' - ').replace(/\s+/g,' ').trim();
-   for(const region of ['USA','Europe','Japan']){
-     const filename=encodeURIComponent(base+' ('+region+').png');
-     links.push('https://thumbnails.libretro.com/Sony%20-%20PlayStation%20Portable/Named_Boxarts/'+filename);
-   }
- }
- return [...new Set(links)].slice(0,7);
+ const saved=safeCover(game.cover);
+ return saved?[saved]:[];
 }
 const thumbText=title=>String(title||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]||'').join('').toUpperCase().slice(0,3);
 function coverMarkup(game,cat){
